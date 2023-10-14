@@ -1,6 +1,6 @@
 import express from "express";
-import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
+import createApolloGraphqlServer from "./graphql";
 
 async function init() {
   const app = express();
@@ -8,26 +8,12 @@ async function init() {
 
   app.use(express.json());
 
-  //create graphql server
-  const gqlServer = new ApolloServer({
-    typeDefs: `
-        type Query {
-            hello: String
-        }
-    `,
-    resolvers: {
-        Query: {
-            hello: () => `hello`
-        }
-    },
-  })
-
-  //start the graphql server
-  await gqlServer.start();
-
   app.get("/", (req, res) => {
     res.json({ message: "Server is up and runing " });
   });
+
+  //create graphql server
+  const gqlServer = await createApolloGraphqlServer();
 
   app.use("/graphql", expressMiddleware(gqlServer));
 
